@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My YouTube Clone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --text-color: #f1f1f1;
+            --text-muted: #aaaaaa;
+            --hover-color: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(15, 15, 15, 0.85);
+            --accent-color: #cc0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-icon {
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .menu-icon:hover { background-color: var(--hover-color); }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            cursor: pointer;
+        }
+        .logo i { color: var(--accent-color); font-size: 24px; }
+
+        .header-center {
+            display: flex;
+            flex: 0 1 600px;
+            align-items: center;
+        }
+
+        .search-bar {
+            display: flex;
+            width: 100%;
+            background-color: #121212;
+            border: 1px solid #303030;
+            border-radius: 40px;
+            overflow: hidden;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            padding: 10px 20px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-bar button {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-left: 1px solid #303030;
+            color: var(--text-color);
+            padding: 0 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .search-bar button:hover { background-color: rgba(255, 255, 255, 0.12); }
+
+        .header-right { display: flex; gap: 15px; align-items: center; }
+        .header-right i { font-size: 20px; cursor: pointer; padding: 10px; border-radius: 50%; }
+        .header-right i:hover { background-color: var(--hover-color); }
+        .profile-pic { width: 32px; height: 32px; border-radius: 50%; background-color: #555; cursor: pointer; }
+
+        /* Main Layout */
+        .container { display: flex; margin-top: 60px; height: calc(100vh - 60px); }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-color);
+            padding-top: 10px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 0 10px;
+            transition: 0.2s;
+        }
+        .nav-item:hover { background-color: var(--hover-color); }
+        .nav-item i { margin-right: 20px; font-size: 20px; width: 24px; text-align: center; }
+        .nav-item.active { background-color: var(--hover-color); font-weight: 500; }
+
+        /* Video Grid */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 24px;
+            background-color: var(--bg-color);
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            row-gap: 40px;
+        }
+
+        .video-card { cursor: pointer; transition: transform 0.2s; }
+        .video-card:hover .thumbnail img { border-radius: 0; }
+        
+        .thumbnail {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 12px;
+        }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            transition: border-radius 0.2s;
+        }
+        .duration {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            font-size: 12px;
+            padding: 3px 4px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .video-info { display: flex; gap: 12px; }
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #555;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .video-details { display: flex; flex-direction: column; }
+        .video-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        .channel-name, .video-stats { font-size: 14px; color: var(--text-muted); line-height: 1.2; }
+        .channel-name { margin-bottom: 2px; }
+        .channel-name:hover { color: var(--text-color); }
+
+        /* Video Player Modal (Glassmorphism) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content {
+            width: 90%;
+            max-width: 1000px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        iframe, video { width: 100%; height: 100%; border: none; }
+
+        /* Loader */
+        .loader {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .header-center { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <i class="fas fa-bars menu-icon"></i>
+            <div class="logo">
+                <i class="fab fa-youtube"></i> DevTube
+            </div>
+        </div>
+        <div class="header-center">
+            <div class="search-bar">
+                <input type="text" placeholder="Tìm kiếm">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div class="header-right">
+            <i class="fas fa-video"></i>
+            <i class="far fa-bell"></i>
+            <div class="profile-pic"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="nav-item active"><i class="fas fa-home"></i> Trang chủ</div>
+            <div class="nav-item"><i class="fas fa-fire"></i> Thịnh hành</div>
+            <div class="nav-item"><i class="fas fa-play-circle"></i> Kênh đăng ký</div>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+            <div class="nav-item"><i class="fas fa-photo-video"></i> Thư viện</div>
+            <div class="nav-item"><i class="fas fa-history"></i> Video đã xem</div>
+        </aside>
+
+        <main class="main-content">
+            <div class="video-grid" id="video-grid">
+                <div class="loader">Đang tải cấu hình video... <i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Xem Video -->
+    <div class="modal" id="videoModal">
+        <div class="modal-content">
+            <i class="fas fa-times close-btn" onclick="closeModal()"></i>
+            <div id="playerContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        /* ==============================================================
+           BẠN CHỈ CẦN THÊM LINK VIDEO VÀO MẢNG NÀY (Hỗ trợ Youtube & MP4)
+           ============================================================== */
+        const videoLinks = [
+            "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            "https://www.youtube.com/watch?v=kJQP7kiw5Fk",
+            "https://youtu.be/jNQXAC9IVRw",
+            "https://www.w3schools.com/html/mov_bbb.mp4" // Test link video trực tiếp
+        ];
+
+        const grid = document.getElementById('video-grid');
+
+        // Hàm trích xuất ID Youtube bằng Regex
+        function getYoutubeId(url) {
+            const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+            const match = url.match(regExp);
+            return (match && match[1].length === 11) ? match[1] : null;
+        }
+
+        // Hàm lấy dữ liệu video (Title, Thumbnail)
+        async function fetchVideoData(url) {
+            const ytId = getYoutubeId(url);
+            
+            if (ytId) {
+                try {
+                    // Sử dụng oEmbed công cộng để lấy Title không cần API Key (tránh lỗi CORS)
+                    const res = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${ytId}`);
+                    const data = await res.json();
+                    
+                    if(data.error) throw new Error("Video private hoặc không tồn tại");
+
+                    return {
+                        title: data.title,
+                        thumbnail: `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`,
+                        channel: data.author_name || "YouTube Channel",
+                        embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=1`,
+                        type: 'youtube'
+                    };
+                } catch (e) {
+                    // Fallback nếu API oEmbed bị lỗi
+                    return {
+                        title: "Video YouTube (Không lấy được tiêu đề)",
+                        thumbnail: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                        channel: "Unknown Channel",
+                        embedUrl: `https://www.youtube.com/embed/${ytId}?autoplay=1`,
+                        type: 'youtube'
+                    };
+                }
+            } else {
+                // Xử lý link video định dạng khác (.mp4)
+                const filename = url.split('/').pop();
+                return {
+                    title: decodeURIComponent(filename) || "Video tự lưu trữ",
+                    thumbnail: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80",
+                    channel: "My Server",
+                    embedUrl: url,
+                    type: 'direct'
+                };
+            }
+        }
+
+        // Render Card Video
+        function createVideoCard(videoData) {
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            
+            // Random view và thời gian cho sinh động
+            const views = Math.floor(Math.random() * 900) + 10;
+            const timeA = Math.floor(Math.random() * 11) + 1;
+            
+            // Lấy chữ cái đầu của tên kênh làm avatar
+            const avatarChar = videoData.channel.charAt(0).toUpperCase();
+
+            card.innerHTML = `
+                <div class="thumbnail">
+                    <img src="${videoData.thumbnail}" alt="Thumbnail" onerror="this.src='https://via.placeholder.com/640x360.png?text=No+Thumbnail'">
+                    <span class="duration">Auto</span>
+                </div>
+                <div class="video-info">
+                    <div class="channel-avatar" style="background-color: hsl(${Math.random() * 360}, 60%, 40%)">
+                        ${avatarChar}
+                    </div>
+                    <div class="video-details">
+                        <h3 class="video-title" title="${videoData.title}">${videoData.title}</h3>
+                        <p class="channel-name">${videoData.channel} <i class="fas fa-check-circle" style="font-size: 11px; margin-left: 4px;"></i></p>
+                        <p class="video-stats">${views}N lượt xem • ${timeA} tháng trước</p>
+                    </div>
+                </div>
+            `;
+
+            card.onclick = () => openModal(videoData);
+            return card;
+        }
+
+        // Khởi tạo trang
+        async function init() {
+            grid.innerHTML = ''; // Xóa loader
+            for (const link of videoLinks) {
+                const data = await fetchVideoData(link);
+                const card = createVideoCard(data);
+                grid.appendChild(card);
+            }
+        }
+
+        // Quản lý Modal Player
+        const modal = document.getElementById('videoModal');
+        const playerContainer = document.getElementById('playerContainer');
+
+        function openModal(videoData) {
+            if (videoData.type === 'youtube') {
+                playerContainer.innerHTML = `<iframe src="${videoData.embedUrl}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            } else {
+                playerContainer.innerHTML = `<video src="${videoData.embedUrl}" controls autoplay></video>`;
+            }
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            playerContainer.innerHTML = ''; // Dừng video khi đóng
+        }
+
+        // Đóng modal khi click ra ngoài vùng video
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Bắt đầu chạy
+        init();
+    </script>
+</body>
+</html>
